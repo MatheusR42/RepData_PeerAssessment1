@@ -5,12 +5,25 @@ output:
     keep_md: true
 ---
 
+## Requiring packages
+
+```{r echo=TRUE}
+library(dplyr)
+```
 
 ## Loading and preprocessing the data
 
+Here we unzip, read the activity data and format time to analysis.
 
+```{r echo=TRUE}
+activityData <- read.csv(unz("activity.zip", "activity.csv"), sep = ",")
+activityData$date <- as.Date(as.character(activityData$date), "%Y-%m-%d")
+```
 
 ## What is mean total number of steps taken per day?
+```{r echo=TRUE}
+
+```
 
 
 
