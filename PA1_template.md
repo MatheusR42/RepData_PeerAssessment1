@@ -50,7 +50,7 @@ head(totalByDay, 10)
 ## 10 2012-10-10  9900
 ```
 
-Now we get the mean and the average
+Now we get the mean and the median
 
 ```r
 meanSteps <- mean(totalByDay$steps, na.rm = TRUE)
@@ -85,14 +85,14 @@ legend(
 First we need to group the data by interval and summarize the average.
 
 ```r
-interval <- group_by(activityData, interval) %>%
+groupInterval <- group_by(activityData, interval) %>%
             summarise(averageSteps = mean(steps, na.rm = TRUE))
 ```
 
 Result:
 
 ```r
-head(interval, 10)
+head(groupInterval, 10)
 ```
 
 ```
@@ -114,13 +114,13 @@ head(interval, 10)
 Now we can get the interval with the maximum average number of steps.
 
 ```r
-maxSteps <- interval[interval$averageSteps == max(interval$averageSteps), ]
+maxSteps <- groupInterval[groupInterval$averageSteps == max(groupInterval$averageSteps), ]
 ```
 
 Let's make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days.
 
 ```r
-with(interval, plot(interval, averageSteps, type = "l", xlab = "5-minute interval", ylab = "Average number of steps"))
+with(groupInterval, plot(interval, averageSteps, type = "l", xlab = "5-minute interval", ylab = "Average number of steps"))
 title(main="What is the average daily activity pattern?")
 
 # Finally we can add a point to indicate the interval with the maximum number of steps
@@ -133,6 +133,156 @@ text(maxSteps$interval, maxSteps$averageSteps, labels = legendText, pos = 4)
 
 ## Imputing missing values
 
+Note that there is some missing values in our data
 
+
+```r
+# Number of lines with missing values
+missingValuesCount <- nrow(activityData[is.na(activityData$steps), ])
+print(missingValuesCount)
+```
+
+```
+## [1] 2304
+```
+
+Has been there 2304 missing values, it can be change the result, so let's
+fill theses values using the average by interval data used in the previous question.
+
+
+```r
+# Creating a new datset with original data
+filledData <- activityData 
+
+# Loop through the rows
+for(i in 1:nrow(filledData)){
+    # Verify if this row has missing value
+    if(is.na(filledData[i, "steps"])){
+        # Get row 5-minute interval
+        rowInterval <- filledData[i, "interval"]
+        
+        # Filling in the missing value with the round of the mean value to this interval
+        filledData[i, "steps"] <- round(groupInterval[groupInterval$interval == rowInterval, "averageSteps"], 0)
+    }
+}
+```
+
+In our new data se there is no more missing values
+
+
+```r
+# Number of lines with missing values in new data set
+nrow(filledData[is.na(filledData$steps), ])
+```
+
+```
+## [1] 0
+```
+
+And we can se the difference in the first rows
+
+```r
+# Original data
+head(activityData,10)
+```
+
+```
+##    steps       date interval
+## 1     NA 2012-10-01        0
+## 2     NA 2012-10-01        5
+## 3     NA 2012-10-01       10
+## 4     NA 2012-10-01       15
+## 5     NA 2012-10-01       20
+## 6     NA 2012-10-01       25
+## 7     NA 2012-10-01       30
+## 8     NA 2012-10-01       35
+## 9     NA 2012-10-01       40
+## 10    NA 2012-10-01       45
+```
+
+```r
+# Filled in data
+head(filledData,10)
+```
+
+```
+##    steps       date interval
+## 1      2 2012-10-01        0
+## 2      0 2012-10-01        5
+## 3      0 2012-10-01       10
+## 4      0 2012-10-01       15
+## 5      0 2012-10-01       20
+## 6      2 2012-10-01       25
+## 7      1 2012-10-01       30
+## 8      1 2012-10-01       35
+## 9      0 2012-10-01       40
+## 10     1 2012-10-01       45
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+It's a good idea to set locale category to show week days in English
+
+```r
+Sys.setlocale("LC_TIME", "C")
+```
+
+```
+## [1] "C"
+```
+
+```r
+unique(weekdays(filledData$date))
+```
+
+```
+## [1] "Monday"    "Tuesday"   "Wednesday" "Thursday"  "Friday"    "Saturday" 
+## [7] "Sunday"
+```
+
+Now we will create a new factor variable to indicating whether a given date is a weekday or weekend day and group the data by interval and weekday
+
+```r
+filledData$weekday <- "weekday"
+filledData[weekdays(filledData$date) %in% c("Saturday", "Sunday"), "weekday"] <- "weekend"
+filledData$weekday <- as.factor(filledData$weekday)
+
+#Group by interval and weekday and summarize the average
+groupIntervalWeekDay <- group_by(filledData, interval, weekday) %>%
+    summarise(averageSteps = mean(steps, na.rm = TRUE))
+
+head(groupIntervalWeekDay, 10)
+```
+
+```
+## # A tibble: 10 x 3
+## # Groups:   interval [5]
+##    interval weekday averageSteps
+##       <int>  <fctr>        <dbl>
+##  1        0 weekday   2.28888889
+##  2        0 weekend   0.25000000
+##  3        5 weekday   0.40000000
+##  4        5 weekend   0.00000000
+##  5       10 weekday   0.15555556
+##  6       10 weekend   0.00000000
+##  7       15 weekday   0.17777778
+##  8       15 weekend   0.00000000
+##  9       20 weekday   0.08888889
+## 10       20 weekend   0.00000000
+```
+
+We will use the ggplot2 library to make more easy to create panel plots
+
+```r
+library(ggplot2)
+```
+
+
+```r
+qplot(interval, averageSteps, data = groupIntervalWeekDay,
+      facets = weekday ~ ., geom = "line",
+      xlab = "5-minute interval", ylab = "Number of steps",
+      main = "Differences in activity \npatterns between weekdays and weekends")
+```
+
+<img src="PA1_template_files/figure-html/unnamed-chunk-18-1.png" style="display: block; margin: auto;" />
