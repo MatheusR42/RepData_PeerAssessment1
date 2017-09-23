@@ -146,7 +146,7 @@ print(missingValuesCount)
 ## [1] 2304
 ```
 
-Has been there 2304 missing values, it can be change the result, so let's
+Has been there 2304 missing values, it can be changing the result, so let's
 fill theses values using the average by interval data used in the previous question.
 
 
@@ -167,7 +167,7 @@ for(i in 1:nrow(filledData)){
 }
 ```
 
-In our new data se there is no more missing values
+In our new data set there is no more missing values
 
 
 ```r
@@ -179,7 +179,7 @@ nrow(filledData[is.na(filledData$steps), ])
 ## [1] 0
 ```
 
-And we can se the difference in the first rows
+And we can set the difference in the first rows
 
 ```r
 # Original data
@@ -218,6 +218,64 @@ head(filledData,10)
 ## 9      0 2012-10-01       40
 ## 10     1 2012-10-01       45
 ```
+
+First we group data by date and sumarise the sum of steps
+
+```r
+filledTotalByDay <- group_by(filledData, date) %>% summarize(steps = sum(steps, na.rm = TRUE))
+```
+
+Result:
+
+```r
+head(filledTotalByDay, 10)
+```
+
+```
+## # A tibble: 10 x 2
+##          date steps
+##        <date> <dbl>
+##  1 2012-10-01 10762
+##  2 2012-10-02   126
+##  3 2012-10-03 11352
+##  4 2012-10-04 12116
+##  5 2012-10-05 13294
+##  6 2012-10-06 15420
+##  7 2012-10-07 11015
+##  8 2012-10-08 10762
+##  9 2012-10-09 12811
+## 10 2012-10-10  9900
+```
+
+Now we get the mean and the median
+
+```r
+meanSteps <- mean(filledTotalByDay$steps, na.rm = TRUE)
+medianSteps <- median(filledTotalByDay$steps, na.rm = TRUE)
+```
+
+And add everything in a good informative plot
+
+```r
+hist(filledTotalByDay$steps, col = "turquoise3", xlab = "Total number of steps", main = "Total number of steps taken each day")
+
+#Add lines in the mean and median
+abline(v=meanSteps, col="red", lwd=2)
+abline(v=medianSteps, col="black", lwd=2, lty = 2)
+
+legend(
+    "topright", # places a legend at the appropriate place
+    c(paste0("Mean (", round(meanSteps,1)," steps)"),
+      paste0("Median (", medianSteps," steps)")), # puts text in the legend
+    pch = c("|","|"), # gives the legend appropriate symbols
+    col=c("red", "black"),# gives the legend lines the correct color
+    cex=0.8 # gives the legend box size
+) 
+```
+
+<img src="PA1_template_files/figure-html/unnamed-chunk-18-1.png" style="display: block; margin: auto;" />
+
+Without missing values the mean value increased and is closest to median
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -285,4 +343,4 @@ qplot(interval, averageSteps, data = groupIntervalWeekDay,
       main = "Differences in activity \npatterns between weekdays and weekends")
 ```
 
-<img src="PA1_template_files/figure-html/unnamed-chunk-18-1.png" style="display: block; margin: auto;" />
+<img src="PA1_template_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
