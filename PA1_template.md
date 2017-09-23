@@ -222,7 +222,7 @@ head(filledData,10)
 First we group data by date and sumarise the sum of steps
 
 ```r
-filledTotalByDay <- group_by(filledData, date) %>% summarize(steps = sum(steps, na.rm = TRUE))
+filledTotalByDay <- group_by(filledData, date) %>% summarize(steps = sum(steps))
 ```
 
 Result:
@@ -250,8 +250,8 @@ head(filledTotalByDay, 10)
 Now we get the mean and the median
 
 ```r
-meanSteps <- mean(filledTotalByDay$steps, na.rm = TRUE)
-medianSteps <- median(filledTotalByDay$steps, na.rm = TRUE)
+meanSteps <- mean(filledTotalByDay$steps)
+medianSteps <- median(filledTotalByDay$steps)
 ```
 
 And add everything in a good informative plot

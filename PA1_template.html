@@ -255,7 +255,7 @@ head(filledData,10)</code></pre>
 ## 9      0 2012-10-01       40
 ## 10     1 2012-10-01       45</code></pre>
 <p>First we group data by date and sumarise the sum of steps</p>
-<pre class="r"><code>filledTotalByDay &lt;- group_by(filledData, date) %&gt;% summarize(steps = sum(steps, na.rm = TRUE))</code></pre>
+<pre class="r"><code>filledTotalByDay &lt;- group_by(filledData, date) %&gt;% summarize(steps = sum(steps))</code></pre>
 <p>Result:</p>
 <pre class="r"><code>head(filledTotalByDay, 10)</code></pre>
 <pre><code>## # A tibble: 10 x 2
@@ -272,8 +272,8 @@ head(filledData,10)</code></pre>
 ##  9 2012-10-09 12811
 ## 10 2012-10-10  9900</code></pre>
 <p>Now we get the mean and the median</p>
-<pre class="r"><code>meanSteps &lt;- mean(filledTotalByDay$steps, na.rm = TRUE)
-medianSteps &lt;- median(filledTotalByDay$steps, na.rm = TRUE)</code></pre>
+<pre class="r"><code>meanSteps &lt;- mean(filledTotalByDay$steps)
+medianSteps &lt;- median(filledTotalByDay$steps)</code></pre>
 <p>And add everything in a good informative plot</p>
 <pre class="r"><code>hist(filledTotalByDay$steps, col = &quot;turquoise3&quot;, xlab = &quot;Total number of steps&quot;, main = &quot;Total number of steps taken each day&quot;)
 
